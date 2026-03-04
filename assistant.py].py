@@ -27,6 +27,46 @@ def read_notes():
         content = f.read()
     return f"📜 Твои записи:\n{content}"
 
+def calculator_percent(text):
+    import re
+    numbers = re.findall(r'\d+', text)
+    if len(numbers)>= 2:
+        percent = float(numbers[0])
+        number = float(numbers[1])
+        result = number * (percent/100)
+        return f"{percent}% от {number} = {result}"
+    return "Формат: [процент] от [число]"
+
+def translate_text(text):
+    translations = {
+         "привет": "hello",
+        "пока": "goodbye",
+        "спасибо": "thank you",
+        "да": "yes",
+        "нет": "no"
+    }
+    words = text.lower().split()
+    translated = []
+    for word in words:
+        translated.append(translations.get(word,word))
+    return " ".join(translated)
+
+def count_words(text):
+    words = text.split()
+    chars = len(text)
+    sentences = text.count('.') + text.count('!') + text.count('?')
+    return  f"Слов: {len(words)}, Символов: {chars}, Предложений: {sentences}"
+
+def set_reminder(text):
+    import re 
+    match = re.search(r'(\d+)',text)
+    if match:
+        minutes = int(match.group(1))
+        return  f"⏰ Напомню через {minutes} минут (симуляция)"
+    return  "Формат: напомни через [число] минут"
+
+
+
 def clear_notes():
     if os.path.exists("ai_notes.txt"):
         os.remove("ai_notes.txt")
@@ -42,6 +82,10 @@ template = """Ты — голосовой помощник. У тебя есть
 Если пользователь просит найти что-то, напиши только слово 'ГУГЛ'.
 Если пользователь спрашивает который час, напиши только слово 'ВРЕМЯ'.
 Если просят записать или запомнить — пиши 'ЗАПИСАТЬ'.
+СЧЁТЧИК - посчитать слова
+НАПОМИНАНИЕ - установить таймер
+ПЕРЕВОД - перевести слово
+ПРОЦЕНТ - посчитать проценты
 Если это обычный вопрос, просто ответь на него.
 
 Вопрос: {input}
@@ -78,5 +122,13 @@ while True:
     elif "ЗАПИСАТЬ" in ai_decision:
         clean_text = clean_chain.invoke({"text": user_input}).strip()
         print(save_note(clean_text))
+    elif  "ПРОЦЕНТ" in ai_decision:
+        print(calculator_percent(user_input))
+    elif "ПЕРЕВОД" in ai_decision:
+        print(translate_text(user_input))
+    elif "СЧЕТЧИК" in ai_decision:
+        print(count_words(user_input))
+    elif "НАПОМИНАНИЕ" in ai_decision:
+        print(set_reminder(user_input))
     else:
         print("ИИ отвечает:", ai_decision)
